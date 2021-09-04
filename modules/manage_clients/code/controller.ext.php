@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
@@ -54,11 +54,11 @@ class module_controller extends ctrl_module
     {
         global $zdbh;
         if ($uid == 0) {
-            $sql = "SELECT * FROM x_accounts WHERE ac_enabled_in=1 AND ac_deleted_ts IS NULL ORDER BY ac_user_vc";
+            $sql = "SELECT * FROM x_accounts WHERE ac_enabled_in=1 AND ac_deleted_ts IS NULL";
             $numrows = $zdbh->prepare($sql);
             $numrows->execute();
         } else {
-            $sql = "SELECT * FROM x_accounts WHERE ac_reseller_fk=:uid AND ac_enabled_in=1 AND ac_deleted_ts IS NULL ORDER BY ac_user_vc";
+            $sql = "SELECT * FROM x_accounts WHERE ac_reseller_fk=:uid AND ac_enabled_in=1 AND ac_deleted_ts IS NULL";
             $numrows = $zdbh->prepare($sql);
             $numrows->bindParam(':uid', $uid);
             $numrows->execute();
@@ -560,20 +560,13 @@ class module_controller extends ctrl_module
             } else {
                 $protocol = 'http://';
             }
-            $port = ctrl_options::GetSystemOption('sentora_port');
-            $domain = ctrl_options::GetSystemOption('sentora_domain');
-            # If using non-standard port
-            if ($port !== "80" && $port !== "443" && !empty($port)) {
-                # Append port to domain
-                $domain .= ":" . $port;
-            }
             $emailsubject = str_replace("{{username}}", $username, $emailsubject);
             $emailsubject = str_replace("{{password}}", $password, $emailsubject);
             $emailsubject = str_replace("{{fullname}}", $fullname, $emailsubject);
             $emailbody = str_replace("{{username}}", $username, $emailbody);
             $emailbody = str_replace("{{password}}", $password, $emailbody);
             $emailbody = str_replace("{{fullname}}", $fullname, $emailbody);
-            $emailbody = str_replace('{{controlpanelurl}}', $protocol . $domain, $emailbody);
+            $emailbody = str_replace('{{controlpanelurl}}', $protocol . ctrl_options::GetSystemOption('sentora_domain'), $emailbody);
 
             $phpmailer = new sys_email();
             $phpmailer->Subject = $emailsubject;
@@ -681,14 +674,13 @@ class module_controller extends ctrl_module
         return true;
     }
 
-	static function IsValidEmail($email)
-	{
-		if (!filter_var($email, FILTER_SANITIZE_EMAIL))
-				return false;
-		if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-				return false;
-		return true;
-	}
+    static function IsValidEmail($email)
+    {
+        if (!preg_match('/^[a-z0-9]+([_\\.-][a-z0-9]+)*@([a-z0-9]+([\.-][a-z0-9]+)*)+\\.[a-z]{2,}$/i', $email)) {
+            return false;
+        }
+        return true;
+    }
 
     static function IsValidUserName($username)
     {
@@ -700,19 +692,8 @@ class module_controller extends ctrl_module
 
     static function DefaultEmailBody()
     {
-        global $zdbh;
-	$sql = "SELECT so_value_tx FROM x_settings WHERE so_name_vc = :configName";
-        $numrows = $zdbh->prepare($sql);
-        $numrows->bindValue(':configName', 'welcome_message');
-        $numrows->execute();
-
-        $result = $numrows->fetch();
-        
-        if ($result) {
-            return ($result['so_value_tx']);
-        } else {
-            return false;
-        }
+        $line = ui_language::translate("Hi {{fullname}},\r\rWe are pleased to inform you that your new hosting account is now active!\r\rYou can access your web hosting control panel using this link:\r{{controlpanelurl}}\r\rYour username and password is as follows:\rUsername: {{username}}\rPassword: {{password}}\r\rMany thanks,\rThe management");
+        return $line;
     }
 
     /**
@@ -726,7 +707,7 @@ class module_controller extends ctrl_module
         global $zdbh;
         $sql = "SELECT COUNT(*) FROM x_accounts WHERE LOWER(ac_user_vc)=:username";
         $uniqueuser = $zdbh->prepare($sql);
-        $uniqueuser->bindValue(':username', strtolower($username));
+        $uniqueuser->bindParam(':username', strtolower($username));
         if ($uniqueuser->execute()) {
             if ($uniqueuser->fetchColumn() > 0) {
                 return true;

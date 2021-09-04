@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
@@ -1221,13 +1221,13 @@ class module_controller extends ctrl_module
                         $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN MX " . $rowdns['dn_priority_in'] . " " . $rowdns['dn_target_vc'] . "." . fs_filehandler::NewLine();
                     }
                     if ($rowdns['dn_type_vc'] == "TXT") {
-                        $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN TXT \"" . rtrim(chunk_split(stripslashes($rowdns['dn_target_vc']), 100, '" "'),'" "') . "\"" . fs_filehandler::NewLine();
+                        $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN TXT \"" . stripslashes($rowdns['dn_target_vc']) . "\"" . fs_filehandler::NewLine();
                     }
                     if ($rowdns['dn_type_vc'] == "SRV") {
                         $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN SRV " . $rowdns['dn_priority_in'] . " " . $rowdns['dn_weight_in'] . " " . $rowdns['dn_port_in'] . " " . $rowdns['dn_target_vc'] . "." . fs_filehandler::NewLine();
                     }
                     if ($rowdns['dn_type_vc'] == "SPF") {
-                        $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN SPF \"" . rtrim(chunk_split(stripslashes($rowdns['dn_target_vc']), 100, '" "'),'" "') . "\"" . fs_filehandler::NewLine();
+                        $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN SPF \"" . stripslashes($rowdns['dn_target_vc']) . "\"" . fs_filehandler::NewLine();
                     }
                     if ($rowdns['dn_type_vc'] == "NS") {
                         $checkline .= $rowdns['dn_host_vc'] . " " . $rowdns['dn_ttl_in'] . " IN NS " . $rowdns['dn_target_vc'] . "." . fs_filehandler::NewLine();

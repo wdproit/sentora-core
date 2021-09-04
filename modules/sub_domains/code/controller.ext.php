@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
@@ -66,35 +66,27 @@ class module_controller extends ctrl_module
             return false;
         }
     }
-    
-    /**
-     * Produces a list of domain names only.
-     * @global db_driver $zdbh
-     * @param int $uid
-     * @return boolean
-     */
+
     static function ListDomains($uid)
     {
         global $zdbh;
-        $currentuser = ctrl_users::GetUserDetail($uid);
-        
         $sql = "SELECT * FROM x_vhosts WHERE vh_acc_fk=:uid AND vh_deleted_ts IS NULL AND vh_type_in=1 ORDER BY vh_name_vc ASC";
-        $binds = array(':uid' => $currentuser['userid']);
-        $prepared = $zdbh->bindQuery($sql, $binds);
-        
-        $rows = $prepared->fetchAll(PDO::FETCH_ASSOC);
-        $return = array();
-        
-        if (count($rows) > 0) {
-            foreach ($rows as $row) {
-                $return[] = array(
-                    'name' => $row['vh_name_vc'], 
-                    'directory' => $row['vh_directory_vc'],
-                    'active' => $row['vh_active_in'],
-                    'id' => $row['vh_id_pk'],
-                );
+        //$numrows = $zdbh->query($sql);
+        $numrows = $zdbh->prepare($sql);
+        $numrows->bindParam(':uid', $uid);
+        $numrows->execute();
+        if ($numrows->fetchColumn() <> 0) {
+            $sql = $zdbh->prepare($sql);
+            $sql->bindParam(':uid', $uid);
+            $res = array();
+            $sql->execute();
+            while ($rowdomains = $sql->fetch()) {
+                array_push($res, array('name' => $rowdomains['vh_name_vc'],
+                    'directory' => $rowdomains['vh_directory_vc'],
+                    'active' => $rowdomains['vh_active_in'],
+                    'id' => $rowdomains['vh_id_pk']));
             }
-            return $return;
+            return $res;
         } else {
             return false;
         }
@@ -139,18 +131,17 @@ class module_controller extends ctrl_module
         return $retval;
     }
 
-    public function ExecuteAddSubDomain($uid, $sub, $domain, $destination, $autohome)
+    public function ExecuteAddSubDomain($uid, $domain, $destination, $autohome)
     {
         global $zdbh;
         $retval = FALSE;
         runtime_hook::Execute('OnBeforeAddSubDomain');
         $currentuser = ctrl_users::GetUserDetail($uid);
-        $subdomain = strtolower(str_replace(' ', '', $sub)) . '.' . strtolower(str_replace(' ', '', $domain));
         $domain = strtolower(str_replace(' ', '', $domain));
-        if (!fs_director::CheckForEmptyValue(self::CheckCreateForErrors($subdomain, $domain))) {
+        if (!fs_director::CheckForEmptyValue(self::CheckCreateForErrors($domain))) {
             //** New Home Directory **//
             if ($autohome == 1) {
-                $destination = "/" . str_replace(".", "_", $subdomain);
+                $destination = "/" . str_replace(".", "_", $domain);
                 $vhost_path = ctrl_options::GetSystemOption('hosted_dir') . $currentuser['username'] . "/public_html/" . $destination . "/";
                 fs_director::CreateDirectory($vhost_path);
                 //** Existing Home Directory **//
@@ -191,7 +182,7 @@ class module_controller extends ctrl_module
 														 2,
 														 :time)"); //CLEANER FUNCTION ON $domain and $homedirectory_to_use (Think I got it?)
             $sql->bindParam(':userid', $currentuser['userid']);
-            $sql->bindParam(':domain', $subdomain);
+            $sql->bindParam(':domain', $domain);
             $sql->bindParam(':destination', $destination);
             $time = time();
             $sql->bindParam(':time', $time);
@@ -210,18 +201,18 @@ class module_controller extends ctrl_module
         }
     }
 
-    static function CheckCreateForErrors($subdomain, $domain)
+    static function CheckCreateForErrors($domain)
     {
         global $zdbh;
         // Check for spaces and remove if found...
-        $subdomain = strtolower(str_replace(' ', '', $subdomain));
+        $domain = strtolower(str_replace(' ', '', $domain));
         // Check to make sure the domain is not blank before we go any further...
-        if ($subdomain == '') {
+        if ($domain == '') {
             self::$blank = TRUE;
             return FALSE;
         }
         // Check for invalid characters in the domain...
-        if (!self::IsValidDomainName($subdomain)) {
+        if (!self::IsValidDomainName($domain)) {
             self::$badname = TRUE;
             return FALSE;
         }
@@ -238,7 +229,7 @@ class module_controller extends ctrl_module
         // Check to see if the domain already exists in Sentora somewhere and redirect if it does....
         $sql = "SELECT COUNT(*) FROM x_vhosts WHERE vh_name_vc=:domain AND vh_deleted_ts IS NULL";
         $numrows = $zdbh->prepare($sql);
-        $numrows->bindParam(':domain', $subdomain);
+        $numrows->bindParam(':domain', $domain);
 
         if ($numrows->execute()) {
             if ($numrows->fetchColumn() > 0) {
@@ -262,11 +253,15 @@ class module_controller extends ctrl_module
 
     static function IsValidDomainName($a)
     {
-        $parts = explode(".", $a);
-        foreach ($parts as $part) {
-            if (!preg_match('/^[a-z\d][a-z\d-]{0,62}$/i', $part) || preg_match('/-$/', $part)) {
-                return false;
+        if (stristr($a, '.')) {
+            $part = explode(".", $a);
+            foreach ($part as $check) {
+                if (!preg_match('/^[a-z\d][a-z\d-]{0,62}$/i', $check) || preg_match('/-$/', $check)) {
+                    return false;
+                }
             }
+        } else {
+            return false;
         }
         return true;
     }
@@ -278,8 +273,8 @@ class module_controller extends ctrl_module
     
     static function IsValidDomain($domain)
     {
-         foreach(self::ListDomains() as $key => $checkDomain){
-            if(array_key_exists('name', $checkDomain) && $checkDomain['name'] == $domain){
+         foreach(self::ListDomains() as $checkDomain){
+            if($checkDomain == $domain){
                 return true;
             }
         }
@@ -359,7 +354,7 @@ class module_controller extends ctrl_module
         runtime_csfr::Protect();
         $currentuser = ctrl_users::GetUserDetail();
         $formvars = $controller->GetAllControllerRequests('FORM');
-        if (self::ExecuteAddSubDomain($currentuser['userid'], $formvars['inSub'], $formvars['inDomain'], $formvars['inDestination'], $formvars['inAutoHome'])) {
+        if (self::ExecuteAddSubDomain($currentuser['userid'], $formvars['inSub'] . "." . $formvars['inDomain'], $formvars['inDestination'], $formvars['inAutoHome'])) {
             self::$ok = TRUE;
             return true;
         } else {

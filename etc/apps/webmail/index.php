@@ -1,4 +1,6 @@
 <?php
+header('Location: https://webmail.wdpro.it/');
+exit;
 /*
  +-------------------------------------------------------------------------+
  | Roundcube Webmail IMAP Client                                           |

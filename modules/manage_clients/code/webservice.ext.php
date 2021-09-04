@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * @package zpanelx
@@ -18,7 +18,7 @@ class webservice extends ws_xmws
     {
         $request_data = $this->RawXMWSToArray($this->wsdata);
         $contenttags = $this->XMLDataToArray($request_data['content']);
-        module_controller::ExecuteDeleteClient($contenttags['uid'], empty($contenttags['moveid']) ? 1 : $contenttags['moveid']);
+        module_controller::ExecuteDeleteClient($contenttags['uid']);
         $dataobject = new runtime_dataobject();
         $dataobject->addItemValue('response', '');
         $dataobject->addItemValue('content', ws_xmws::NewXMLTag('uid', $contenttags['uid']) . ws_xmws::NewXMLTag('deleted', 'true'));

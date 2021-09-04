@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - Visitor Stats zpanel plugin, written by RusTus: www.zpanelcp.com.
@@ -42,7 +42,7 @@ function GenerateWebalizerStats()
         /** all other args and flags are the same so keep them outsite to avoid duplication */
         $flag        = '-o';
         
-        $secondFlags = '-d -p -F clf -n';
+        $secondFlags = '-d -F clf -n';
 
         $domain = $rowvhost[ 'vh_name_vc' ];
 

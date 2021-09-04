@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * Generic template place holder class.
@@ -112,7 +112,7 @@ class ui_tpl_modulelistznavbar
      */
     public static function get_gravatar($email, $s = 80, $d = 'mm', $r = 'g', $img = false, $atts = array())
     {
-        $url = 'https://www.gravatar.com/avatar/';
+        $url = self::getCurrentProtocol() . 'www.gravatar.com/avatar/';
         $url .= md5(strtolower(trim($email)));
         $url .= "?s=$s&d=$d&r=$r";
         if ($img) {

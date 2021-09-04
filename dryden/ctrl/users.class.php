@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * General user infoamtion class.
@@ -203,7 +203,7 @@ class ctrl_users {
      */
     static function CheckUserEmailIsUnique($email) {
         global $zdbh;
-            $sql = "SELECT COUNT(*) FROM x_accounts WHERE LOWER(ac_email_vc)=:email AND ac_deleted_ts IS NULL";
+            $sql = "SELECT COUNT(*) FROM x_accounts WHERE LOWER(ac_email_vc)=:email";
             $uniqueuser = $zdbh->prepare($sql);
             $uniqueuser->bindParam(':email', $email);
             if ($uniqueuser->execute()) {

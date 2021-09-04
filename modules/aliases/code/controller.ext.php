@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
@@ -118,30 +118,29 @@ class module_controller extends ctrl_module
             return false;
         }
     }
-    
-    /**
-     * Produces a list of domain names only.
-     * @global db_driver $zdbh
-     * @param int $uid
-     * @return boolean
-     */
-    static function getDomainList($uid)
+
+    static function getDomainList($uid = null)
     {
         global $zdbh;
+        global $controller;
+        if (($uid == '') || (empty($uid)) || ($uid == null)) {
+            $uid = ctrl_auth::CurrentUserID();
+        }
         $currentuser = ctrl_users::GetUserDetail($uid);
-        
         $sql = "SELECT * FROM x_vhosts WHERE vh_acc_fk=:userid AND vh_enabled_in=1 AND vh_deleted_ts IS NULL ORDER BY vh_name_vc ASC";
-        $binds = array(':userid' => $currentuser['userid']);
-        $prepared = $zdbh->bindQuery($sql, $binds);
-        
-        $rows = $prepared->fetchAll(PDO::FETCH_ASSOC);
-        $return = array();
-        
-        if (count($rows) > 0) {
-            foreach ($rows as $row) {
-                $return[] = array('domain' => $row['vh_name_vc']);
+        $numrows = $zdbh->prepare($sql);
+        $numrows->bindParam(':userid', $currentuser['userid']);
+        $numrows->execute();
+
+        if ($numrows->fetchColumn() <> 0) {
+            $sqlRun = $zdbh->prepare($sql);
+            $sqlRun->bindParam(':userid', $currentuser['userid']);
+            $res = array();
+            $sqlRun->execute();
+            while ($rowdomains = $sqlRun->fetch()) {
+                array_push($res, array('domain' => $rowdomains['vh_name_vc']));
             }
-            return $return;
+            return $res;
         } else {
             return false;
         }
@@ -288,8 +287,8 @@ class module_controller extends ctrl_module
     
     static function IsValidDomain($domain)
     {
-         foreach(self::getDomainList() as $key => $checkDomain){
-            if(array_key_exists('domain', $checkDomain) && $checkDomain['domain'] == $domain){
+         foreach(self::getDomainList() as $checkDomain){
+            if($checkDomain == $domain){
                 return true;
             }
         }
@@ -452,7 +451,7 @@ class module_controller extends ctrl_module
             return ui_sysmessage::shout(ui_language::translate("Your email address cannot be blank."), "zannounceerror");
         }
         if (!fs_director::CheckForEmptyValue(self::$validdomain)) {
-            return ui_sysmessage::shout(ui_language::translate("The selected domain was not valid or not yet active."), "zannounceerror");
+            return ui_sysmessage::shout(ui_language::translate("The selected domain was not valid."), "zannounceerror");
         }
         if (!fs_director::CheckForEmptyValue(self::$ok)) {
             return ui_sysmessage::shout(ui_language::translate("Changes to your aliases have been saved successfully!"), "zannounceok");

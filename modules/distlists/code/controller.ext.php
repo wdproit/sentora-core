@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
@@ -145,29 +145,20 @@ class module_controller extends ctrl_module
         }
     }
 
-    /**
-     * Produces a list of domain names only.
-     * @global db_driver $zdbh
-     * @param int $uid
-     * @return boolean
-     */
-    static function getDomainList($uid)
+    static function getDomainList()
     {
         global $zdbh;
-        $currentuser = ctrl_users::GetUserDetail($uid);
-        
-        $sql = "SELECT * FROM x_vhosts WHERE vh_acc_fk=:userid AND vh_enabled_in=1 AND vh_deleted_ts IS NULL ORDER BY vh_name_vc ASC";
-        $binds = array(':userid' => $currentuser['userid']);
-        $prepared = $zdbh->bindQuery($sql, $binds);
-        
-        $rows = $prepared->fetchAll(PDO::FETCH_ASSOC);
-        $return = array();
-        
-        if (count($rows) > 0) {
-            foreach ($rows as $row) {
-                $return[] = array('domain' => $row['vh_name_vc']);
+        $currentuser = ctrl_users::GetUserDetail();
+        $sql = "SELECT * FROM x_vhosts WHERE vh_acc_fk=" . $currentuser['userid'] . " AND vh_enabled_in=1 AND vh_deleted_ts IS NULL ORDER BY vh_name_vc ASC";
+        $numrows = $zdbh->query($sql);
+        if ($numrows->fetchColumn() <> 0) {
+            $sql = $zdbh->prepare($sql);
+            $res = array();
+            $sql->execute();
+            while ($rowdomains = $sql->fetch()) {
+                $res[] = array('domain' => $rowdomains['vh_name_vc']);
             }
-            return $return;
+            return $res;
         } else {
             return false;
         }
@@ -318,7 +309,7 @@ class module_controller extends ctrl_module
             self::$validemail = true;
             return false;
         }
-        if(!self::IsValidDomain($inDomain)){
+        if(!self::IsValidDomain($domain)){
             self::$validdomain = true;
             return false;        
         }
@@ -394,16 +385,10 @@ class module_controller extends ctrl_module
     {
         return preg_match('/^[a-z0-9]+([_\\.-][a-z0-9]+)*@([a-z0-9]+([\.-][a-z0-9]+)*)+\\.[a-z]{2,}$/i', $email) == 1;
     }
-    
-    /**
-     * 
-     * @param string $domain
-     * @return boolean
-     */
     static function IsValidDomain($domain)
     {
-         foreach(self::getDomainList() as $key => $checkDomain){
-            if(array_key_exists('domain', $checkDomain) && $checkDomain['domain'] == $domain){
+         foreach(self::getDomainList() as $checkDomain){
+            if($checkDomain == $domain){
                 return true;
             }
         }

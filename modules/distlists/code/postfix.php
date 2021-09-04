@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright 2014-2019 Sentora Project (http://www.sentora.org/) 
+ * @copyright 2014-2015 Sentora Project (http://www.sentora.org/) 
  * Sentora is a GPL fork of the ZPanel Project whose original header follows:
  *
  * ZPanel - A Cross-Platform Open-Source Web Hosting Control panel.
@@ -38,7 +38,7 @@ try {
 
 
 
-// Deleting Postfix Distribution List
+// Deleting Postfix Distubution List
 if (!fs_director::CheckForEmptyValue(self::$delete)) {
     //$result = $mail_db->query("SELECT address FROM alias WHERE address='" . $rowdl['dl_address_vc'] . "'")->Fetch();
     $numrows = $mail_db->prepare("SELECT address FROM alias WHERE address=:dl_address_vc");
@@ -51,28 +51,9 @@ if (!fs_director::CheckForEmptyValue(self::$delete)) {
         $sql->bindParam(':dl_address_vc', $rowdl['dl_address_vc']);
         $sql->execute();
     }
-
-   // If no more mailboxes or aliases for the domain exist, delete the domain to
-   // prevent Postfix using a local route when sending to this domain in future
-
-   $domaincheck = explode("@", $rowdl['dl_address_vc']);
-   $sql = $mail_db->prepare("SELECT * FROM mailbox WHERE domain=:domain");
-   $sql->bindParam(':domain', $domaincheck[1]);
-   $sql->execute();
-   $mailboxresult = $sql->fetch();
-   $sql = $mail_db->prepare("SELECT * FROM alias WHERE domain=:domain");
-   $sql->bindParam(':domain', $domaincheck[1]);
-   $sql->execute();
-   $aliasresult = $sql->fetch();
-
-   if (!$mailboxresult && !$aliasresult) {
-       $sql = $mail_db->prepare("DELETE FROM domain WHERE domain=:domain");
-       $sql->bindParam(':domain', $domaincheck[1]);
-       $sql->execute();
-   }
 }
 
-// Adding Postfix Distribution List
+// Adding Postfix Distubution List
 if (!fs_director::CheckForEmptyValue(self::$create)) {
     //$result = $mail_db->query("SELECT address FROM alias WHERE address='" . $fulladdress . "'")->Fetch();
     $numrows = $mail_db->prepare("SELECT address FROM alias WHERE address=:fulladdress");
@@ -99,7 +80,7 @@ if (!fs_director::CheckForEmptyValue(self::$create)) {
     }
 }
 
-// Deleting Postfix Distribution List User
+// Deleting Postfix Distubution List User
 if (!fs_director::CheckForEmptyValue(self::$deleteuser)) {
     //$result = $mail_db->query("SELECT * FROM alias WHERE address='" . $rowdl['dl_address_vc'] . "'")->Fetch();
     $numrows = $mail_db->prepare("SELECT * FROM alias WHERE address=:dl_address_vc");
@@ -118,7 +99,7 @@ if (!fs_director::CheckForEmptyValue(self::$deleteuser)) {
     }
 }
 
-// Adding Postfix Distribution List User
+// Adding Postfix Distubution List User
 if (!fs_director::CheckForEmptyValue(self::$createuser)) {
     //$result = $mail_db->query("SELECT * FROM alias WHERE address='" . $rowdl['dl_address_vc'] . "'")->Fetch();
     $numrows = $mail_db->prepare("SELECT * FROM alias WHERE address=:dl_address_vc");
