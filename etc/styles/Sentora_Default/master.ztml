@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Sentora &gt; <# ui_tpl_username #> - <# ui_tpl_domainname #></title>
+        <title>WebDesignProduction &gt; <# ui_tpl_username #> - <# ui_tpl_domainname #></title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <!-- Stylesheets -->
@@ -224,7 +224,7 @@
                                     </div>
 
                                     <div class="stats-row">
-                                        <div class="stats-column"><strong><: Sentora Version :>:</strong></div>
+                                        <div class="stats-column"><strong><: WebDesignProduction Version :>:</strong></div>
                                         <div class="stats-column"><# ui_tpl_sentoraversion #></div>
                                     </div>
 
@@ -257,7 +257,7 @@
 
                 </div><!--/page-content-->
             </div>
-            <div id="footer" >Copyright &copy; 2004-<# ui_tpl_year #> <a href="http://www.sentora.org/" target="_blank">Sentora Project</a>.</div>
+            <div id="footer" >Copyright &copy; 2004-<# ui_tpl_year #> <a href="https://www.wdpro.it/" target="_blank">WebDesignProduction</a>.</div>
         </div><!-- END CONTAINER -->
 
         <!-- Javascript

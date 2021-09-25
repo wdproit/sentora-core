@@ -47,7 +47,7 @@
         <div class="loginwrapper">
             <div class="panel login-panel">
                 <div class="panel-heading login-head">
-                    <img src="/etc/styles/Sentora_Default/img/logos/sentora_logo.png" alt="Sentora Logo" width="334" height="93">
+                    <img src="/etc/styles/Sentora_Default/img/logos/sentora_logo.png" alt="WebDesignProduction Logo" width="334" height="93">
                 </div>
                 <div class="panel-content form-horizontal">
                 <?php
@@ -189,7 +189,7 @@
                 <?php }?>
                 </div><!-- End Panel content-->
             </div>
-            <p class="vbox">Powered by <a href="http://www.sentora.org/" target="_blank">Sentora</a></p>
+            <p class="vbox">Powered by <a href="https://www.wdpro.it/" target="_blank">WebDesignProduction</a></p>
         </div>
         <!-- Javascript
         ================================================== -->
